@@ -1,0 +1,74 @@
+spring:
+  application:
+    name: iot-808-order-service
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  data:
+    mongodb:
+      host: 19.87.22.23
+      port: 27017
+      database: p808
+  cloud:
+    consul:
+      host: 19.87.22.25
+      port: 8500
+      discovery:
+        register: true
+        hostname: 19.87.22.12
+        serviceName: ${spring.application.name}
+        healthCheckPath: /actuator/health
+        healthCheckInterval: 15s
+        tags: urlprefix-/${spring.application.name}
+        instanceId: ${spring.application.name}:${vcap.application.instance_id:${spring.application.instance_id:${random.value}}}
+    config:
+      name: ${spring.application.name}
+      profile: dev
+      discovery:
+        enabled: true
+        service-id: xtool-config-server
+#ribbon:
+#  ReadTimeout: 5000
+#  ConnectTimeout: 2000
+#  iot-808-orderid-service:
+#    ReadTimeout: 1000
+#    ConnectTimeout: 1000
+#  MaxAutoRetries: 2
+#  MaxAutoRetriesNextServer: 2
+  
+feign:
+  hystrix:
+    enabled: true
+  client:
+    config:
+      default:
+        read-timeout: 5000
+        connect-timeout: 1000
+    
+hystrix:
+  metrics:
+    enabled: true
+  threadpool:
+    default:
+      coreSize: 10
+  command:
+    default:
+      fallback:
+        enabled: true
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 10000
+      circuitBreaker:
+        requestVolumeThreshold: 100
+ 
+server:
+  port: 8723
+  
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+        - hystrix.stream
+        - health
